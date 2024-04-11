@@ -6,4 +6,4 @@ driver = uc.Chrome()
 driver.get('https://nowsecure.nl')
 
 # Sleep for 120 seconds
-time.sleep(120)
+time.sleep(1200)
