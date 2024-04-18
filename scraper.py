@@ -5,8 +5,8 @@ import requests
 import undetected_chromedriver as uc
 
 # Set up AWS services
-sns_client = boto3.client('sns')
-sqs_client = boto3.client('sqs')
+sns_client = boto3.client('sns', region_name='eu-west-2')
+sqs_client = boto3.client('sqs', region_name='eu-west-2')
 sqs_queue_url = 'https://sqs.eu-west-2.amazonaws.com/637423486927/StatusQueue.fifo'
 
 def get_public_ip():
