@@ -60,6 +60,7 @@ while not loaded:
     # if driver.find_element_by_tag_name('body').text.strip() != '':
     if driver.find_element(By.TAG_NAME, 'body').text.strip() != '':
         print("Page has loaded content, exiting the loop.")
+        loaded = True
         break
     # Refresh the page
     driver.refresh()
