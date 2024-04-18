@@ -19,7 +19,7 @@ def get_public_ip():
 def handle_sns_message():
     # This is a placeholder. In practice, you would set this up to be triggered by an actual SNS message.
     # Here we assume you have the message containing the URL
-    message = {'url': 'http://example.com'}
+    message = {'url': 'https://twitter.com/home'}
     return message['url']
 
 def publish_to_sqs(url, ip_address):
@@ -48,7 +48,8 @@ while not loaded:
     print('Refreshing...')
     # Check if the page has loaded by looking for any text or a specific element
     # Example: Check if there is any text in the body
-    if driver.find_element_by_tag_name('body').text.strip() != '':
+    # if driver.find_element_by_tag_name('body').text.strip() != '':
+    if driver.find_element('body').text.strip() != '':
         print("Page has loaded content, exiting the loop.")
         break
     # Refresh the page
