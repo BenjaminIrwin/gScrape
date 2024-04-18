@@ -31,6 +31,8 @@ def publish_to_sqs(url, ip_address):
     }
     sqs_client.send_message(QueueUrl=sqs_queue_url, MessageBody=str(message_body))
 
+print('Setting up chromedriver...')
+
 # Main flow
 driver = uc.Chrome()
 url = handle_sns_message()
