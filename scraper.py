@@ -4,6 +4,8 @@ import requests
 
 import undetected_chromedriver as uc
 
+print('Setting up SQS and SNS services...')
+
 # Set up AWS services
 sns_client = boto3.client('sns', region_name='eu-west-2')
 sqs_client = boto3.client('sqs', region_name='eu-west-2')
@@ -33,12 +35,15 @@ def publish_to_sqs(url, ip_address):
 driver = uc.Chrome()
 url = handle_sns_message()
 
+print('Navigating to:', url)
+
 driver.get(url)
 
 loaded = False
 
 # Start a loop that will refresh the page every 2.5 seconds
 while not loaded:
+    print('Refreshing...')
     # Check if the page has loaded by looking for any text or a specific element
     # Example: Check if there is any text in the body
     if driver.find_element_by_tag_name('body').text.strip() != '':
