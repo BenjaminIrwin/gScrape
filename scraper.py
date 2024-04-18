@@ -1,8 +1,11 @@
 import time
+from datetime import datetime
+
 import boto3
 import requests
 
 import undetected_chromedriver as uc
+from selenium.webdriver.common.by import By
 
 print('Setting up SQS and SNS services...')
 
@@ -17,6 +20,9 @@ def get_public_ip():
     return response.text
 
 def handle_sns_message():
+    # Wait until we have received a message from SNS
+
+
     # This is a placeholder. In practice, you would set this up to be triggered by an actual SNS message.
     # Here we assume you have the message containing the URL
     message = {'url': 'https://twitter.com/home'}
@@ -29,7 +35,10 @@ def publish_to_sqs(url, ip_address):
         "status": "loaded",
         "link": f"https://{ip_address}:6080/vnc.html?host={ip_address}&port=6080"
     }
-    sqs_client.send_message(QueueUrl=sqs_queue_url, MessageBody=str(message_body))
+    sqs_client.send_message(QueueUrl=sqs_queue_url,
+                            MessageBody=str(message_body),
+                            MessageGroupId=str(datetime.now().timestamp()))
+
 
 print('Setting up chromedriver...')
 
@@ -49,7 +58,7 @@ while not loaded:
     # Check if the page has loaded by looking for any text or a specific element
     # Example: Check if there is any text in the body
     # if driver.find_element_by_tag_name('body').text.strip() != '':
-    if driver.find_element('body').text.strip() != '':
+    if driver.find_element(By.TAG_NAME, 'body').text.strip() != '':
         print("Page has loaded content, exiting the loop.")
         break
     # Refresh the page
