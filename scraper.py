@@ -63,7 +63,7 @@ def publish_to_sqs(ip_address, status):
     """ Publish a message to SQS with the status of the page load. """
     message_body = {
         "status": status,
-        "ip": ip_address
+        "instance_ip": ip_address
     }
     sqs_client.send_message(QueueUrl=sqs_status_url,
                             MessageBody=str(message_body),
