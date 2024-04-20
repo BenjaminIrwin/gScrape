@@ -89,6 +89,11 @@ loaded = False
 
 publish_to_sqs(public_ip_address, 'loading')
 
+
+def holding_page(text):
+    return 'until there is a free space on the booking site' in text
+
+
 # Start a loop that will refresh the page every 2.5 seconds
 while True:
     new_url = listen_for_sqs_change()
@@ -99,7 +104,7 @@ while True:
     try:
         print('Refreshing...')
         # Check if the page has loaded by looking for any text or a specific element
-        if driver.find_element(By.TAG_NAME, 'body').text.strip() != '':
+        if (driver.find_element(By.TAG_NAME, 'body').text.strip() != '' and not holding_page(driver.find_element(By.TAG_NAME, 'body').text.strip())):
             print("Page has loaded content, exiting the loop.")
             publish_to_sqs(public_ip_address, 'success')
             # Wait indefinitely to keep the browser open
@@ -112,6 +117,7 @@ while True:
                     publish_to_sqs(public_ip_address, 'loading')
                     url = new_url
                     restart = True
+            continue
         # Refresh the page
         driver.refresh()
         # Wait for 2.5 seconds
