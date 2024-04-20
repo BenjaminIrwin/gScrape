@@ -90,7 +90,7 @@ loaded = False
 publish_to_sqs(public_ip_address, 'loading')
 
 # Start a loop that will refresh the page every 2.5 seconds
-while not loaded:
+while True:
     new_url = listen_for_sqs_change()
     if new_url:
         print('New URL detected:', new_url)
@@ -99,12 +99,19 @@ while not loaded:
     try:
         print('Refreshing...')
         # Check if the page has loaded by looking for any text or a specific element
-        # Example: Check if there is any text in the body
-        # if driver.find_element_by_tag_name('body').text.strip() != '':
         if driver.find_element(By.TAG_NAME, 'body').text.strip() != '':
             print("Page has loaded content, exiting the loop.")
-            loaded = True
-            break
+            publish_to_sqs(public_ip_address, 'success')
+            # Wait indefinitely to keep the browser open
+            restart = False
+            while not restart:
+                new_url = listen_for_sqs_change()
+                if new_url:
+                    print('New URL detected:', new_url)
+                    driver.get(new_url)
+                    publish_to_sqs(public_ip_address, 'loading')
+                    url = new_url
+                    restart = True
         # Refresh the page
         driver.refresh()
         # Wait for 2.5 seconds
@@ -112,11 +119,5 @@ while not loaded:
     except Exception as e:
         publish_to_sqs(public_ip_address, 'failure')
 
-if loaded:
-    publish_to_sqs(public_ip_address, 'success')
-
-    # Wait indefinitely to keep the browser open
-    while True:
-        time.sleep(100)
 
 driver.quit()
