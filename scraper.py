@@ -54,8 +54,14 @@ def listen_for_sqs_change(wait_time = 1):
         url = message_body.get('Message')
         start_time_str = message_body.get('subject')
         if start_time_str is not 'New URL':
-            # Parse the time given that it is in the format "HH:MM"
-            start_time = datetime.strptime(start_time_str, '%H:%M')
+            # Get the current date
+            today_date = datetime.now().date()
+
+            # Parse the time
+            parsed_time = datetime.strptime('07:56', '%H:%M').time()
+
+            # Combine current date with parsed time
+            start_time = datetime.combine(today_date, parsed_time)
         else:
             start_time = None
         # Delete the message
