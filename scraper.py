@@ -52,9 +52,22 @@ def listen_for_sqs_change(wait_time = 1):
         message = messages[-1]
         message_body = json.loads(message['Body'])
         url = message_body.get('Message')
-        return url
+        start_time_str = message_body.get('subject')
+        if start_time_str is not 'New URL':
+            # Parse the time given that it is in the format "HH:MM"
+            start_time = datetime.strptime(start_time_str, '%H:%M')
+        else:
+            start_time = None
+        # Delete the message
+        sqs_client.delete_message(
+            QueueUrl=sqs_target_url,
+            ReceiptHandle=message['ReceiptHandle']
+        )
 
-    return None
+        return start_time, url
+
+
+    return None, None
 
 
 
@@ -79,16 +92,22 @@ driver = uc.Chrome()
 url = None
 
 while not url:
-    url = listen_for_sqs_change()
+    start_time, url = listen_for_sqs_change()
+
+    if start_time:
+        # Wait until start_time is reached, given that start_time is GMT
+        while start_time.time() > datetime.utcnow().time():
+            time.sleep(1)
 
 print('Navigating to:', url)
+
+
+publish_to_sqs(public_ip_address, 'loading')
+
 
 driver.get(url)
 
 loaded = False
-
-publish_to_sqs(public_ip_address, 'loading')
-
 
 def holding_page(text):
     return 'until there is a free space on the booking site' in text
@@ -96,7 +115,7 @@ def holding_page(text):
 
 # Start a loop that will refresh the page every 2.5 seconds
 while True:
-    new_url = listen_for_sqs_change()
+    start_time, new_url = listen_for_sqs_change()
     if new_url:
         print('New URL detected:', new_url)
         driver.get(new_url)
@@ -110,7 +129,7 @@ while True:
             # Wait indefinitely to keep the browser open
             restart = False
             while not restart:
-                new_url = listen_for_sqs_change()
+                start_time, new_url = listen_for_sqs_change()
                 if new_url:
                     print('New URL detected:', new_url)
                     driver.get(new_url)
